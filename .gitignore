@@ -1,0 +1,22 @@
+# 機密檔案（絕不進 Git）
+.env
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.DotSettings.user
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Docker 資料卷
+docker-volumes/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,76 @@
+services:
+
+  # ─── Oracle Database XE 21c ───────────────────────────────
+  oracle-db:
+    image: gvenzl/oracle-xe:21-slim
+    container_name: oraclehr_db
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_SYS_PASSWORD}
+      APP_USER: ${ORACLE_APP_USER}
+      APP_USER_PASSWORD: ${ORACLE_APP_PASSWORD}
+    ports:
+      - "6521:1521"
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+      - ./sql:/docker-entrypoint-initdb.d/   # 自動執行 sql/ 下的腳本
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+    networks:
+      - oraclehr_net
+
+  # ─── CloudBeaver（Web DB UI）────────────────────────────────
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: oraclehr_cbv
+    ports:
+      - "6080:8978"
+    volumes:
+      - cloudbeaver_data:/opt/cloudbeaver/workspace
+    depends_on:
+      oracle-db:
+        condition: service_healthy
+    networks:
+      - oraclehr_net
+
+  # ─── ASP.NET Core API ──────────────────────────────────────
+  api:
+    build:
+      context: ./src/OracleHR.API
+      dockerfile: Dockerfile
+    container_name: oraclehr_api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Oracle: "User Id=${ORACLE_APP_USER};Password=${ORACLE_APP_PASSWORD};Data Source=oracle-db:1521/XEPDB1;"
+    ports:
+      - "6000:8080"
+    depends_on:
+      oracle-db:
+        condition: service_healthy
+    networks:
+      - oraclehr_net
+
+  # ─── React 前端（Nginx）────────────────────────────────────
+  web:
+    build:
+      context: ./src/OracleHR.Web
+      dockerfile: Dockerfile
+    container_name: oraclehr_web
+    ports:
+      - "6001:80"
+    depends_on:
+      - api
+    networks:
+      - oraclehr_net
+
+volumes:
+  oracle_data:
+  cloudbeaver_data:
+
+networks:
+  oraclehr_net:
+    driver: bridge
