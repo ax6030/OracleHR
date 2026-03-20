@@ -1,0 +1,6 @@
+@OracleHR.API_HostAddress = http://localhost:5107
+
+GET {{OracleHR.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
