@@ -14,20 +14,54 @@ const apiClient = axios.create({
 
 /** 後端回傳的員工 DTO（對應 GetEmployee.Dto） */
 export interface EmployeeDto {
-  id: number
+  employeeId: number
   empCode: string
   fullName: string
   email: string
-  phone: string | null
-  hireDate: string        // ISO 8601 日期字串
+  jobTitle: string
+  deptName: string
+  baseSalary: number
   status: string          // Active | OnLeave | Resigned
-  departmentName: string | null
-  managerName: string | null
+  hireDate: string        // ISO 8601 日期字串
 }
 
 /** GET /api/employees/{id} */
 export async function getEmployee(id: number): Promise<EmployeeDto> {
   const { data } = await apiClient.get<EmployeeDto>(`/employees/${id}`)
+  return data
+}
+
+/** 後端回傳的薪資記錄 DTO（對應 GetSalaryRecords.Dto） */
+export interface SalaryRecordDto {
+  salaryId: number
+  effectiveDate: string   // ISO 8601
+  baseSalary: number
+  bonus: number
+  totalSalary: number     // Oracle VIRTUAL column 計算值
+  remark: string | null
+}
+
+/** GET /api/employees/{id}/salaries */
+export async function getSalaryRecords(employeeId: number): Promise<SalaryRecordDto[]> {
+  const { data } = await apiClient.get<SalaryRecordDto[]>(`/employees/${employeeId}/salaries`)
+  return data
+}
+
+/** 後端回傳的績效考核 DTO（對應 GetPerformanceReviews.Dto） */
+export interface PerformanceReviewDto {
+  reviewId: number
+  reviewYear: number
+  reviewQuarter: number
+  score: number
+  grade: string           // S / A / B / C / D
+  comments: string | null
+  reviewerName: string
+  reviewDate: string      // ISO 8601
+}
+
+/** GET /api/employees/{id}/reviews */
+export async function getPerformanceReviews(employeeId: number): Promise<PerformanceReviewDto[]> {
+  const { data } = await apiClient.get<PerformanceReviewDto[]>(`/employees/${employeeId}/reviews`)
   return data
 }
 
