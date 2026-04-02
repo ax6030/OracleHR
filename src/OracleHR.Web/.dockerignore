@@ -1,0 +1,17 @@
+# 依賴與產出（build 時重新產生，不需複製進 image）
+node_modules/
+dist/
+.vite/
+
+# 開發工具設定
+.vscode/
+.idea/
+*.local
+
+# 測試與 lint 報告
+coverage/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
