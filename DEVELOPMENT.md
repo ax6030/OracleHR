@@ -40,7 +40,7 @@ docker compose logs -f oracle-db
 
 | 服務 | URL | 說明 |
 |------|-----|------|
-| 前端 | http://localhost:6001 | React + Vite |
+| 前端 | http://localhost:6001 | Vue 3 + Vite |
 | API | http://localhost:6000/swagger | Swagger UI |
 | CloudBeaver | http://localhost:6080 | Web DB UI |
 | Oracle | localhost:6521/XEPDB1 | 直接連線用 |
@@ -183,7 +183,7 @@ src/
 ├── OracleHR.Application/    # Vertical Slice Features（CQRS）
 ├── OracleHR.Infrastructure/ # EF Core + Oracle 實作
 ├── OracleHR.API/            # ASP.NET Core 薄 Controller
-└── OracleHR.Web/            # React + TypeScript + Vite
+└── OracleHR.Web/            # Vue 3 + TypeScript + Vite
 ```
 
 詳細 Oracle 特性說明請見 [docs/ORACLE_GUIDE.md](docs/ORACLE_GUIDE.md)

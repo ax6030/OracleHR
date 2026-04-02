@@ -54,7 +54,7 @@ services:
     networks:
       - oraclehr_net
 
-  # ─── React 前端（Nginx）────────────────────────────────────
+  # ─── Vue 3 前端（Nginx）────────────────────────────────────
   web:
     build:
       context: ./src/OracleHR.Web
