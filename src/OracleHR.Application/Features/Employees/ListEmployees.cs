@@ -6,47 +6,39 @@ using OracleHR.SharedKernel.Models;
 
 namespace OracleHR.Application.Features.Employees;
 
-public static class GetEmployee
+public static class ListEmployees
 {
-    public record Query(long EmployeeId) : IRequest<Result<Dto>>;
+    public record Query : IRequest<Result<IReadOnlyList<Dto>>>;
 
     public record Dto(
         long EmployeeId,
         string EmpCode,
         string FullName,
-        string Email,
         string JobTitle,
         string DeptName,
-        decimal BaseSalary,
-        string Status,
-        DateTime HireDate
+        string Status
     );
 
-    public class Handler(AppDbContext db) : IRequestHandler<Query, Result<Dto>>
+    public class Handler(AppDbContext db) : IRequestHandler<Query, Result<IReadOnlyList<Dto>>>
     {
-        public async Task<Result<Dto>> Handle(Query request, CancellationToken ct)
+        public async Task<Result<IReadOnlyList<Dto>>> Handle(Query request, CancellationToken ct)
         {
-            var dto = await db.Employees
+            var list = await db.Employees
                 .AsNoTracking()
-                .Where(e => e.EmployeeId == request.EmployeeId)
+                .OrderBy(e => e.EmployeeId)
                 .Select(e => new Dto(
                     e.EmployeeId,
                     e.EmpCode,
                     e.LastName + " " + e.FirstName,
-                    e.Email,
                     e.JobTitle,
                     e.Department.DeptName,
-                    e.BaseSalary,
                     e.Status == EmploymentStatus.Active ? "Active"
                         : e.Status == EmploymentStatus.Inactive ? "Inactive"
-                        : "Resigned",
-                    e.HireDate
+                        : "Resigned"
                 ))
-                .FirstOrDefaultAsync(ct);
+                .ToListAsync(ct);
 
-            return dto is null
-                ? Result.Failure<Dto>("員工不存在")
-                : Result.Success(dto);
+            return Result.Success<IReadOnlyList<Dto>>(list);
         }
     }
 }

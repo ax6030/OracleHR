@@ -75,7 +75,7 @@ const formattedHireDate = computed(() => {
 const statusClass = computed(() => {
   switch (store.employee?.status) {
     case 'Active':   return 'status-active'
-    case 'OnLeave':  return 'status-on-leave'
+    case 'Inactive': return 'status-inactive'
     case 'Resigned': return 'status-resigned'
     default:         return ''
   }
@@ -120,7 +120,7 @@ h2 { margin-bottom: 1.5rem; color: #1a3a5c; }
 
 .status-badge { padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
 .status-active   { background: #e8f5e9; color: #2e7d32; }
-.status-on-leave { background: #fff8e1; color: #f57f17; }
+.status-inactive { background: #fff8e1; color: #f57f17; }
 .status-resigned { background: #fce4ec; color: #c62828; }
 
 .info-grid { display: grid; grid-template-columns: 80px 1fr; gap: 0.6rem 1rem; margin: 0 0 1.5rem; }
