@@ -39,8 +39,8 @@ services:
   # ─── ASP.NET Core API ──────────────────────────────────────
   api:
     build:
-      context: ./src/OracleHR.API
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: src/OracleHR.API/Dockerfile
     container_name: oraclehr_api
     environment:
       ASPNETCORE_ENVIRONMENT: Development

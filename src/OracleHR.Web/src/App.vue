@@ -9,6 +9,7 @@
           active-class：當路由匹配時自動加上此 class
         -->
         <RouterLink to="/employees" active-class="active">員工查詢</RouterLink>
+        <RouterLink to="/employees/manage" active-class="active">員工管理</RouterLink>
         <RouterLink to="/departments" active-class="active">組織架構</RouterLink>
       </div>
     </nav>

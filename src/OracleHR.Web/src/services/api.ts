@@ -1,18 +1,22 @@
 import axios from 'axios'
+import type { EmploymentStatus } from '@/types'
 
-// axios 實例：baseURL 指向後端
-// 開發時 vite proxy 攔截 /api/* → http://localhost:6000
-// 生產時 nginx 靜態服務，/api/* 直接打後端容器
 const apiClient = axios.create({
   baseURL: '/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
 })
 
-// ─── 員工相關 ───────────────────────────────────────────────
+// ─── 員工相關 DTO ──────────────────────────────────────────────
 
-/** 後端回傳的員工 DTO（對應 GetEmployee.Dto） */
+export interface EmployeeListItemDto {
+  employeeId: number
+  empCode: string
+  fullName: string
+  jobTitle: string
+  deptName: string
+  status: string
+}
+
 export interface EmployeeDto {
   employeeId: number
   empCode: string
@@ -21,63 +25,111 @@ export interface EmployeeDto {
   jobTitle: string
   deptName: string
   baseSalary: number
-  status: string          // Active | OnLeave | Resigned
-  hireDate: string        // ISO 8601 日期字串
+  status: string
+  hireDate: string   // ISO 8601
 }
 
-/** GET /api/employees/{id} */
-export async function getEmployee(id: number): Promise<EmployeeDto> {
-  const { data } = await apiClient.get<EmployeeDto>(`/employees/${id}`)
-  return data
+export interface CreateEmployeeRequest {
+  firstName: string
+  lastName: string
+  email: string
+  phone: string | null
+  hireDate: string   // ISO 8601
+  jobTitle: string
+  departmentId: number
+  managerId: number | null
+  baseSalary: number
 }
 
-/** 後端回傳的薪資記錄 DTO（對應 GetSalaryRecords.Dto） */
+export interface UpdateEmployeeRequest {
+  employeeId: number
+  firstName: string
+  lastName: string
+  email: string
+  phone: string | null
+  jobTitle: string
+  departmentId: number
+  managerId: number | null
+  baseSalary: number
+  status: EmploymentStatus
+}
+
 export interface SalaryRecordDto {
   salaryId: number
-  effectiveDate: string   // ISO 8601
+  effectiveDate: string
   baseSalary: number
   bonus: number
-  totalSalary: number     // Oracle VIRTUAL column 計算值
+  totalSalary: number
   remark: string | null
 }
 
-/** GET /api/employees/{id}/salaries */
-export async function getSalaryRecords(employeeId: number): Promise<SalaryRecordDto[]> {
-  const { data } = await apiClient.get<SalaryRecordDto[]>(`/employees/${employeeId}/salaries`)
-  return data
-}
-
-/** 後端回傳的績效考核 DTO（對應 GetPerformanceReviews.Dto） */
 export interface PerformanceReviewDto {
   reviewId: number
   reviewYear: number
   reviewQuarter: number
   score: number
-  grade: string           // S / A / B / C / D
+  grade: string
   comments: string | null
   reviewerName: string
-  reviewDate: string      // ISO 8601
+  reviewDate: string
 }
 
-/** GET /api/employees/{id}/reviews */
+// 注意：字段名對應後端 GetDepartmentTree.DeptNodeDto 的 camelCase 序列化結果
+export interface DepartmentNodeDto {
+  departmentId: number
+  deptName: string
+  parentDeptId: number | null
+  depth: number
+  fullPath: string
+  isLeaf: boolean
+}
+
+export interface DepartmentListItemDto {
+  departmentId: number
+  deptName: string
+}
+
+// ─── API 函式 ─────────────────────────────────────────────────
+
+export async function listEmployees(): Promise<EmployeeListItemDto[]> {
+  const { data } = await apiClient.get<EmployeeListItemDto[]>('/employees')
+  return data
+}
+
+export async function getEmployee(id: number): Promise<EmployeeDto> {
+  const { data } = await apiClient.get<EmployeeDto>(`/employees/${id}`)
+  return data
+}
+
+export async function createEmployee(req: CreateEmployeeRequest): Promise<number> {
+  const { data } = await apiClient.post<{ employeeId: number }>('/employees', req)
+  return data.employeeId
+}
+
+export async function updateEmployee(id: number, req: UpdateEmployeeRequest): Promise<void> {
+  await apiClient.put(`/employees/${id}`, req)
+}
+
+export async function deleteEmployee(id: number): Promise<void> {
+  await apiClient.delete(`/employees/${id}`)
+}
+
+export async function getSalaryRecords(employeeId: number): Promise<SalaryRecordDto[]> {
+  const { data } = await apiClient.get<SalaryRecordDto[]>(`/employees/${employeeId}/salaries`)
+  return data
+}
+
 export async function getPerformanceReviews(employeeId: number): Promise<PerformanceReviewDto[]> {
   const { data } = await apiClient.get<PerformanceReviewDto[]>(`/employees/${employeeId}/reviews`)
   return data
 }
 
-// ─── 部門相關 ───────────────────────────────────────────────
-
-/** 後端回傳的部門節點（CONNECT BY 拉平後的結構） */
-export interface DepartmentNodeDto {
-  id: number
-  deptCode: string
-  deptName: string
-  level: number           // CONNECT BY 階層深度
-  parentId: number | null
-}
-
-/** GET /api/departments/tree */
 export async function getDepartmentTree(): Promise<DepartmentNodeDto[]> {
   const { data } = await apiClient.get<DepartmentNodeDto[]>('/departments/tree')
+  return data
+}
+
+export async function listDepartments(): Promise<DepartmentListItemDto[]> {
+  const { data } = await apiClient.get<DepartmentListItemDto[]>('/departments')
   return data
 }

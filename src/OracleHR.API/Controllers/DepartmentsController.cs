@@ -8,9 +8,15 @@ namespace OracleHR.API.Controllers;
 [Route("api/[controller]")]
 public class DepartmentsController(IMediator mediator) : ControllerBase
 {
-    /// <summary>
-    /// 取得部門組織樹（使用 Oracle CONNECT BY 原生語法）
-    /// </summary>
+    // GET /api/departments
+    [HttpGet]
+    public async Task<IActionResult> List(CancellationToken ct)
+    {
+        var result = await mediator.Send(new ListDepartments.Query(), ct);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+    }
+
+    // GET /api/departments/tree（Oracle CONNECT BY）
     [HttpGet("tree")]
     public async Task<IActionResult> GetTree(CancellationToken ct)
     {

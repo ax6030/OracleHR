@@ -5,11 +5,13 @@
 -- =============================================================
 
 -- ── MV 1：月薪資彙總報表 ──────────────────────────────────
+-- BUILD IMMEDIATE：立即建立；REFRESH COMPLETE：完整刷新（vs FAST 增量刷新）
+-- NEXT SYSDATE + 1：每天自動刷新（注意：行末不能有 -- 注釋，Oracle 會把它存入 NEXT 表達式字串）
 CREATE MATERIALIZED VIEW mv_monthly_salary_summary
-BUILD IMMEDIATE                   -- 立即建立
-REFRESH COMPLETE                  -- 完整刷新（vs FAST 增量刷新）
+BUILD IMMEDIATE
+REFRESH COMPLETE
 START WITH SYSDATE
-NEXT SYSDATE + 1                  -- 每天自動刷新
+NEXT SYSDATE + 1
 AS
 SELECT
     e.department_id,
@@ -35,7 +37,8 @@ CREATE MATERIALIZED VIEW mv_yearly_performance
 BUILD IMMEDIATE
 REFRESH COMPLETE
 START WITH SYSDATE
-NEXT SYSDATE + 7                  -- 每週刷新
+-- NEXT SYSDATE + 7：每週刷新
+NEXT SYSDATE + 7
 AS
 SELECT
     pr.employee_id,
